@@ -16,4 +16,4 @@ class Income(models.Model):
      amount = models.BigIntegerField()
      user = models.ForeignKey(User,on_delete=models.DO_NOTHING,)
      def __str__(self):
-          return "{}-{}".format(self.date, self.amount) 
+          return "{}-{}".format(self.date, self.amount)  
