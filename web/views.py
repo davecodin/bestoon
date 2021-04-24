@@ -121,6 +121,12 @@ def register(request):
 
 
 
+def index(request):
+    context = {}
+    return render(request, 'index.html', context)
+
+
+
 
 @csrf_exempt
 
