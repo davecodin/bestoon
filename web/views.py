@@ -89,7 +89,7 @@ def register(request):
             # }
             message = 'ایمیلی حاوی لینک فعال سازی اکانت به شما فرستاده شده، لطفا پس از چک کردن ایمیل، روی لینک کلیک کنید.'
             message = 'قدیم ها ایمیل فعال سازی می فرستادیم ولی الان شرکتش ما رو تحریم کرده (: پس راحت و بی دردسر'
-            body = " برای فعال کردن اکانت بستون خود روی لینک روبرو کلیک کنید: <a href=\"{}?email={}&code={}\">لینک رو به رو</a> ".format(request.build_absolute_uri('/accounts/register/'), email, code)
+            body = " برای فعال کردن اکانت بستون خود روی لینک روبرو کلیک کنید:{}?email={}&code={}".format(request.build_absolute_uri('/accounts/register/'), email, code)
             message = message + body
             context = {
                 'message': message }
