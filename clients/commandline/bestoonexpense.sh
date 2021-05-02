@@ -1,9 +1,9 @@
 #!/bin/bash
 
 
-# please set these variables
-TOKEN=9269134245
-BASE_URL=http://bestoon.ir
+
+source config.sh
+
 
 curl --data "token=$TOKEN&amount=$1&text=$2" $BASE_URL/submit/expense/
 

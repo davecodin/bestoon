@@ -12,7 +12,7 @@ from web.models import User, Token, Expense, Income, Passwordresetcodes
 from .models import Passwordresetcodes
 from datetime import datetime
 from django.contrib.auth.hashers import make_password
-
+from django.db.models import Sum, Count
 from django.core.mail import EmailMessage
 
 
@@ -88,12 +88,12 @@ def register(request):
             #     "askReceipt" : "yes"
             # }
             message = 'ایمیلی حاوی لینک فعال سازی اکانت به شما فرستاده شده، لطفا پس از چک کردن ایمیل، روی لینک کلیک کنید.'
-            message = 'قدیم ها ایمیل فعال سازی می فرستادیم ولی الان شرکتش ما رو تحریم کرده (: پس راحت و بی دردسر'
+            # message = 'قدیم ها ایمیل فعال سازی می فرستادیم ولی الان شرکتش ما رو تحریم کرده (: پس راحت و بی دردسر'
             body = " برای فعال کردن اکانت بستون خود روی لینک روبرو کلیک کنید:{}?email={}&code={}".format(request.build_absolute_uri('/accounts/register/'), email, code)
             message = message + body
             context = {
                 'message': message }
-            return render(request, 'login.html', context)
+            return render(request, 'index.html', context)
             # context = {'message': 'لینک فعال سازی اکانت به شما فرستاده شد.لطفا پس از چک کردن ایمیل روی لینک کلیک کنید.'
             # return render(request, 'login.html', context)
            
@@ -111,13 +111,28 @@ def register(request):
             token = Token.objects.create(user=newuser, token=this_token)
             Passwordresetcodes.objects.filter(code=code).delete() #delete the temporary activation code from db
             context = {'message': 'اکانت شما ساخته شد.توکن شما {} است.آن را ذخیره کنید چون دیگر نمایش داده نخواهد شد! جدی'.format(this_token)}
-            return render(request, 'login.html', context)
+            return render(request, 'index.html', context)
         else:
             context = {'message': 'این کد فعال سازی معتبر نیست. در صورت نیاز دوباره تلاش کنید'}
-            return render(request, 'login.html', context)
+            return render(request, 'register.html', context)
     else:
         context = {'message': ''}
         return render(request, 'register.html', context)
+
+
+@csrf_exempt
+
+def generalstat(request):
+    #TODO: should get a valid duration(from - to), if not, use 1 month
+    #TODO: is the token valid?
+    this_token = request.POST['token']
+    this_user = User.objects.filter(token__token = this_token).get()
+    income = Income.objects.filter(user = this_user).aggregate(Count('amount'), Sum('amount'))
+    expense = Expense.objects.filter(user = this_user).aggregate(Count('amount'), Sum('amount'))
+    context = {}
+    context['expense'] = expense
+    context['income'] = income
+    return JsonResponse(context, encoder=JSONEncoder)
 
 
 
@@ -134,6 +149,7 @@ def submit_income (request):
     """submit an income"""
 
     #TODO: validate data, user might be fake, token might be fake, amount might be ...
+    #TODO: is the token valid?
     this_token = request.POST['token']
     this_user = User.objects.filter(token__token = this_token).get()
     if 'date' not in request.POST:
@@ -156,6 +172,7 @@ def submit_expense (request):
     """submit an expense"""
 
     #TODO: validate data, user might be fake, token might be fake, amount might be ...
+    #TODO: is the token valid?
     this_token = request.POST['token']
     this_user = User.objects.filter(token__token = this_token).get()
     if 'date' not in request.POST:
